@@ -1,0 +1,45 @@
+---
+# tasks file for roles/grafana-deployment
+- name: Copy file to add repository
+  ansible.builtin.copy:
+    src: grafana.repo
+    dest: /etc/yum.repos.d/grafana.repo
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Install Grafana package
+  ansible.builtin.package:
+    name: grafana
+    state: present
+
+- name: Ensure Grafana is enabled and running
+  ansible.builtin.service:
+    name: grafana-server.service
+    enabled: true
+    state: started
+
+- name: Ensure apache webserver is not running
+  ansible.builtin.service:
+    name: httpd.service
+    enabled: false
+    state: stopped
+
+- name: Copy config file to change port to 8080 and light theme
+  ansible.builtin.copy:
+    src: grafana.ini
+    dest: /etc/grafana/grafana.ini
+    mode: "0640"
+    owner: root
+    group: grafana
+  notify:
+    - Restart grafana
+
+  ansible.builtin.template:
+    src: vhost.conf.j2
+    dest: /etc/httpd/conf.d/vhost.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart_httpd

@@ -1,0 +1,16 @@
+---
+- name: Apply Grafana role
+  hosts: grafana
+  vars:
+    grafana_theme: dark
+  become: true
+  pre_tasks:
+    - name: Output info before any role execution
+      ansible.builtin.debug:
+        msg: "Beginning grafana server configuration."
+  post_tasks:
+    - name: Ooutput info before all roles are executed
+      ansible.builtin.debug:
+        msg: "Grafana server has been configured."
+  roles:
+    - grafana-deployment
